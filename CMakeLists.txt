@@ -18,7 +18,7 @@ include_directories("inc/")
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
+#set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(
   Boost 1.65
@@ -32,6 +32,7 @@ find_package(Threads REQUIRED)
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_PATH}/main.cpp)
 target_link_libraries(
   ${CMAKE_PROJECT_NAME}
+  ${CMAKE_THREAD_LIBS_INIT}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
