@@ -10,6 +10,7 @@ namespace otus {
   class Solver {
   public:
     // TODO std::string_view
+    // TODO test
     using IntersectionType =
       std::vector<std::tuple<int, std::string, std::string>>;
 

@@ -1,14 +1,14 @@
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
 #include <boost/serialization/strong_typedef.hpp>
-#include <exception>
+#include <boost/system/error_code.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
 
-//#include "server.hpp"
+#include "server.hpp"
 
-//using namespace otus;
+using namespace otus;
 using namespace std;
 namespace io = boost::asio;
 namespace po = boost::program_options;
@@ -33,6 +33,8 @@ void validate(any& v, const vector<string>& values, PortType *, int) {
 }
 
 int main(int argc, char const **argv) {
+  int port;
+
   try {
     po::positional_options_description positional_description { };
     positional_description.add("port", 1);
@@ -51,24 +53,22 @@ int main(int argc, char const **argv) {
       options);
     po::notify(options);
 
-    const int port { options["port"].as<PortType>() };
+    port = options["port"].as<PortType>();
 
-    cerr << port << endl;
+    cerr << "Port has been set to " << port << endl;
   } catch (po::error const &e) {
     cerr << "Options error: " << e.what() << endl;
     return EXIT_FAILURE;
   }
 
-  //try {
-  //  port = get_arg(argc, argv, 1);
-  //  bulkSize = get_arg(argc, argv, 2);
-  //} catch (InvalidArgument const &e) {
-  //  cerr << "Exception while arguments parsion: " << e.what() << endl;
-  //}
-
-  //io::io_service context;
-  //Server server { context, port, bulkSize };
-  //context.run();
+  io::io_service context;
+  try {
+    Server server { context, port };
+    context.run();
+  }
+  catch (boost::system::system_error const &e) {
+    cerr << "Server error: " << e.what() << endl;
+  }
 
   return 0;
 }

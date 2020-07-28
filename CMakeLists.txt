@@ -18,12 +18,13 @@ include_directories("inc/")
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_LIBS ON)
-#set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(
   Boost 1.65
-  COMPONENTS program_options asio system
+  COMPONENTS program_options system
   OPTIONAL_COMPONENTS unit_test_framework)
+include_directories(${Boost_INCLUDE_DIRECTORIES})
 
 find_package(Threads REQUIRED)
 
