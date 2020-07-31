@@ -1,6 +1,9 @@
 #pragma once
 
 #include <boost/algorithm/string.hpp>
+
+#include <boost/bind.hpp>
+
 #include <boost/asio.hpp>
 #include <iostream>
 #include <memory>
@@ -11,47 +14,63 @@
 
 namespace otus {
   using boost::asio::ip::tcp;
+  using boost::asio::streambuf;
 
   class Session: public std::enable_shared_from_this<Session> {
   public:
-    Session(tcp::socket socket, Solver &solver):
+    Session(tcp::socket &&socket, Solver &solver):
     socket(std::move(socket)), solver(solver) { }
 
-    void start() { doRead(); }
+    void start() {
+      doRead();
+    }
 
   private:
+    // FIXME to cpp
+    // FIXME EOF handling
     void doRead() {
       auto self(shared_from_this());
-      socket.async_read_some(
-          boost::asio::buffer(data, maxLength),
-          [this, self](boost::system::error_code ec, size_t length) {
+
+      boost::asio::async_read_until(
+          socket,
+          buffer,
+          '\n',
+          [this, self](auto const &ec, size_t bytesTransferred) {
             if (!ec) {
-              try {
-                request(std::string(data, length));
-              }
-              catch (...) {
-              }
-              doRead();
+            buffer.commit(bytesTransferred);
+            boost::asio::streambuf::const_buffers_type bufs { buffer.data() };
+            std::string s(
+                boost::asio::buffers_begin(bufs),
+                boost::asio::buffers_begin(bufs) + bytesTransferred - 1); // Eliminate \n
+            buffer.consume(bytesTransferred);
+
+            std::cerr << "LINE: " << s << std::endl; // TODO
+
+            // TODO Handler
+
+            doWrite("MESSAGE!\n");
+            }
+            else {
+              std::cerr << "Error while reading socket: " << ec.message() << std::endl;
             }
           });
     }
 
-    void request(std::string const &input) {
-      std::vector<std::string> split { };
-      //boost::split(split, input, ' ');
-      //if (split[0] == "INSERT") {
-      //  if (split[1] == "A") // FIXME
-      //}
-      //else if (split[0] == "TRUNCATE") {
-      //}
-      //std::cerr << split[0] << std::endl;
-      std::cerr << "OLOLO" << std::endl;
+    void doWrite(std::string const &message) {
+      auto self(shared_from_this());
+
+      std::cerr << "doWrite()" << std::endl;
+      socket.async_write_some(
+          boost::asio::buffer(message),
+          [this, self](auto const &ec, size_t) {
+            if (!ec) doRead();
+            else std::cerr << "Error while writing to socket: " << ec.message() << std::endl;
+          });
     }
 
     tcp::socket socket;
     Solver &solver;
-    static constexpr size_t maxLength { 1024 };
-    char data[maxLength];
+    streambuf buffer { };
   };
 
   class Server {
