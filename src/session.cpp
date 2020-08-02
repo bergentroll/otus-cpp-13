@@ -24,9 +24,7 @@ void Session::doRead() {
 
         cerr << "LINE: " << s << endl; // TODO
 
-        // TODO Handler
-
-        doWrite("MESSAGE!\n");
+        doWrite(handler.handleCommand(s));
         }
         else {
           cerr << "Error while reading socket: " << ec.message() << endl;

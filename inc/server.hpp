@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <memory>
 
+#include "handler.hpp"
 #include "session.hpp"
 
 namespace otus {
@@ -19,6 +20,6 @@ namespace otus {
 
     tcp::socket socket;
     tcp::acceptor acceptor;
-    Solver solver { };
+    Handler handler { };
   };
 }

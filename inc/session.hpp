@@ -4,13 +4,13 @@
 #include <boost/asio.hpp>
 #include <memory>
 
-#include "solver.hpp"
+#include "handler.hpp"
 
 namespace otus {
   class Session: public std::enable_shared_from_this<Session> {
   public:
-    Session(boost::asio::ip::tcp::socket &&socket, Solver &solver):
-    socket(std::move(socket)), solver(solver) { }
+    Session(boost::asio::ip::tcp::socket &&socket, Handler &handler):
+    socket(std::move(socket)), handler(handler) { }
 
     void start() { doRead(); }
 
@@ -20,7 +20,7 @@ namespace otus {
     void doWrite(std::string const &message);
 
     boost::asio::ip::tcp::socket socket;
-    Solver &solver;
+    Handler &handler;
     boost::asio::streambuf buffer { };
   };
 }
