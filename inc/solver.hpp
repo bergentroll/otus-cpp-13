@@ -9,9 +9,7 @@
 namespace otus {
   class Solver {
   public:
-    // TODO std::string_view
-    // TODO test
-    using IntersectionType =
+    using JoinType =
       std::vector<std::tuple<int, std::string, std::string>>;
 
     bool insertToA(int id, std::string const &name) {
@@ -26,8 +24,8 @@ namespace otus {
 
     void truncateB() { b.clear(); }
 
-    IntersectionType intersection() const {
-      IntersectionType result { };
+    JoinType intersection() const {
+      JoinType result { };
       for (auto const &[id, name]: a) {
         try { result.push_back({ id, name, b.at(id) }); }
         catch (std::out_of_range const &) { }
@@ -35,8 +33,8 @@ namespace otus {
       return result;
     }
 
-    IntersectionType symmetricDifference() const {
-      IntersectionType result { };
+    JoinType symmetricDifference() const {
+      JoinType result { };
       for (auto const &[id, name]: a)
           if (b.count(id) == 0) result.push_back({ id, name, "" });
       for (auto const &[id, name]: b)
@@ -47,6 +45,6 @@ namespace otus {
   private:
     using TableType = std::unordered_map<int, std::string>;
 
-    TableType a {}, b {};
+    TableType a { }, b { };
   };
 }

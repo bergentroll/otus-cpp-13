@@ -8,6 +8,25 @@
 #include "solver.hpp"
 
 namespace otus {
+  inline std::string format_join_result (Solver::JoinType &input) {
+    std::sort(input.begin(), input.end(), [](auto const &a, auto const &b) {
+          return std::get<0>(a) < std::get<0>(b);
+        });
+
+    std::string result { };
+
+    for (auto line: input) {
+      result += std::to_string(std::get<0>(line));
+      result += " | ";
+      result += std::get<1>(line);
+      result += " | ";
+      result += std::get<2>(line);
+      result += '\n';
+    }
+    return result;
+  }
+
+  // TODO test
   class Handler {
   public:
     std::string handleCommand(std::string_view command) {
@@ -58,14 +77,10 @@ namespace otus {
         else return "Unknown table \"" + tokens[1] + "\"\n";;
       }
       else if (tokens[0] == "INTERSECTION") {
-        if (tokens.size() != 1)
-          return "Error: command \"INTERSECTION\" takes no args\n";
-        return "intersection\n";
+        return handleIntersection(tokens);
       }
       else if (tokens[0] == "SYMMETRIC_DIFFERENCE") {
-        if (tokens.size() != 1)
-          return "Error: command \"SYMMETRIC_DIFFERENCE\" takes no args\n";
-        return "sym diff\n";
+        return handleSymmetricDifference(tokens);
       }
 
       return "Error: unknown command \"" + tokens[0] + "\"\n";
@@ -73,5 +88,23 @@ namespace otus {
 
   private:
     Solver solver { };
+
+    std::string handleIntersection(std::vector<std::string> const &tokens) {
+      if (tokens.size() != 1)
+        return "Error: command \"INTERSECTION\" takes no args\n";
+
+      auto intersection { solver.intersection() };
+
+      return format_join_result(intersection);
+    }
+
+    std::string handleSymmetricDifference(std::vector<std::string> const &tokens) {
+      if (tokens.size() != 1)
+        return "Error: command \"SYMMETRIC_DIFFERENCE\" takes no args\n";
+
+      auto symDiff { solver.symmetricDifference() };
+
+      return format_join_result(symDiff);
+    }
   };
 }
