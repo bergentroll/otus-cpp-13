@@ -12,23 +12,26 @@ namespace otus {
     using JoinType =
       std::vector<std::tuple<int, std::string, std::string>>;
 
-    class DuplicateError: public std::runtime_error {
+    class InvalidOperation: public std::runtime_error {
     public:
-      DuplicateError(std::string const &message):
+      InvalidOperation(std::string const &message):
       std::runtime_error(message) { }
     };
 
-    // TODO Refactor insertion
-    void insertToA(int id, std::string const &name) {
-      auto [iter, success] { a.insert({ id, name }) };
+    class TableNameError: public std::runtime_error {
+    public:
+      TableNameError(std::string const &message):
+      std::runtime_error(message) { }
+    };
+
+    void insert(std::string const &tableName, int id, std::string const &name) {
+      auto [iter, success] { getTableByName(tableName).insert({ id, name }) };
       if (!success)
-        throw DuplicateError("duplicate " + std::to_string((*iter).first));
+        throw InvalidOperation("duplicate " + std::to_string((*iter).first));
     }
 
-    void insertToB(int id, std::string const &name) {
-      auto [iter, success] { b.insert({ id, name }) };
-      if (!success)
-        throw DuplicateError("duplicate " + std::to_string((*iter).first));
+    void truncate(std::string const &tableName) {
+      getTableByName(tableName).clear();
     }
 
     void truncateA() { a.clear(); }
@@ -55,6 +58,12 @@ namespace otus {
 
   private:
     using TableType = std::unordered_map<int, std::string>;
+
+    TableType & getTableByName(std::string const &tableName) {
+      if (tableName == "A") return a;
+      else if (tableName == "B") return b;
+      else throw InvalidOperation("unknown table \"" + tableName + '"');
+    }
 
     TableType a { }, b { };
   };

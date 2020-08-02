@@ -34,7 +34,6 @@ string Handler::handleCommand(string_view command) {
   return "ERR unknown command \"" + tokens[0] + "\"\n";
 }
 
-// TODO Refactor
 string Handler::handleInsert(Tokens const &tokens) {
   if (tokens.size() != 4)
     return "ERR command \"INSERT\" takes exactly three args\n";
@@ -47,41 +46,31 @@ string Handler::handleInsert(Tokens const &tokens) {
     return "ERR invalid id \"" + tokens[2] + "\"\n";
   }
 
-  auto const &name { tokens[3] };
+  string const &tableName { tokens[1] };
+  string const &name { tokens[3] };
 
-  if (tokens[1] == "A") {
-    try {
-      solver.insertToA(id, name);
-    }
-    catch (Solver::DuplicateError const &e) {
-      return "ERR " + string(e.what()) + '\n';
-    }
-    return "OK\n";
+  try {
+    solver.insert(tableName, id, name);
   }
-  else if (tokens[1] == "B") {
-    try {
-      solver.insertToB(id, name);
-    }
-    catch (Solver::DuplicateError const &e) {
-      return "ERR " + string(e.what()) + '\n';
-    }
-    return "OK\n";
+  catch (Solver::InvalidOperation const &e) {
+    return "ERR " + string(e.what()) + '\n';
   }
-  else return "Unknown table \"" + tokens[1] + "\"\n";;
+  return "OK\n";
 }
 
 string Handler::handleTruncate(Tokens const &tokens) {
   if (tokens.size() != 2)
     return "ERR command \"TRUNCATE\" takes exactly one arg\n";
-  else if (tokens[1] == "A") {
-    solver.truncateA();
-    return "OK\n";
+  else {
+    string const &tableName { tokens[1] };
+    try {
+      solver.truncate(tableName);
+    }
+    catch (Solver::InvalidOperation const &e) {
+      return "ERR " + string(e.what()) + '\n';
+    }
   }
-  else if (tokens[1] == "B") {
-    solver.truncateB();
-    return "OK\n";
-  }
-  else return "Unknown table \"" + tokens[1] + "\"\n";;
+  return "OK\n";
 }
 
 string Handler::handleIntersection(Tokens const &tokens) {

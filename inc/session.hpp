@@ -15,7 +15,6 @@ namespace otus {
     void start() { doRead(); }
 
   private:
-    // FIXME EOF handling
     void doRead();
     void doWrite(std::string const &message);
 
