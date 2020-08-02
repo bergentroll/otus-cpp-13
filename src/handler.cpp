@@ -9,7 +9,7 @@ using namespace std;
 using namespace otus;
 
 string Handler::handleCommand(string_view command) {
-  vector<string> tokens;
+  Tokens tokens;
   boost::split(tokens, command, [](char c) { return c == ' '; });
 
   transform(
@@ -19,41 +19,10 @@ string Handler::handleCommand(string_view command) {
       ::toupper);
 
   if (tokens[0] == "INSERT") {
-    if (tokens.size() != 4)
-      return "ERR command \"INSERT\" takes exactly three args\n";
-
-    int id;
-    try {
-      id = boost::lexical_cast<int>(tokens[2]);
-    }
-    catch (boost::bad_lexical_cast const &e) {
-      return "ERR invalid id \"" + tokens[2] + "\"\n";
-    }
-
-    auto const &name { tokens[3] };
-
-    if (tokens[1] == "A") {
-      solver.insertToA(id, name);
-      return "OK\n";
-    }
-    else if (tokens[1] == "B") {
-      solver.insertToB(id, name);
-      return "OK\n";
-    }
-    else return "Unknown table \"" + tokens[1] + "\"\n";;
+    return handleInsert(tokens);
   }
   else if (tokens[0] == "TRUNCATE") {
-    if (tokens.size() != 2)
-      return "ERR command \"TRUNCATE\" takes exactly one arg\n";
-    else if (tokens[1] == "A") {
-      solver.truncateA();
-      return "OK\n";
-    }
-    else if (tokens[1] == "B") {
-      solver.truncateB();
-      return "OK\n";
-    }
-    else return "Unknown table \"" + tokens[1] + "\"\n";;
+    return handleTruncate(tokens);
   }
   else if (tokens[0] == "INTERSECTION") {
     return handleIntersection(tokens);
@@ -65,7 +34,46 @@ string Handler::handleCommand(string_view command) {
   return "ERR unknown command \"" + tokens[0] + "\"\n";
 }
 
-string Handler::handleIntersection(vector<string> const &tokens) {
+string Handler::handleInsert(Tokens const &tokens) {
+  if (tokens.size() != 4)
+    return "ERR command \"INSERT\" takes exactly three args\n";
+
+  int id;
+  try {
+    id = boost::lexical_cast<int>(tokens[2]);
+  }
+  catch (boost::bad_lexical_cast const &e) {
+    return "ERR invalid id \"" + tokens[2] + "\"\n";
+  }
+
+  auto const &name { tokens[3] };
+
+  if (tokens[1] == "A") {
+    solver.insertToA(id, name);
+    return "OK\n";
+  }
+  else if (tokens[1] == "B") {
+    solver.insertToB(id, name);
+    return "OK\n";
+  }
+  else return "Unknown table \"" + tokens[1] + "\"\n";;
+}
+
+string Handler::handleTruncate(Tokens const &tokens) {
+  if (tokens.size() != 2)
+    return "ERR command \"TRUNCATE\" takes exactly one arg\n";
+  else if (tokens[1] == "A") {
+    solver.truncateA();
+    return "OK\n";
+  }
+  else if (tokens[1] == "B") {
+    solver.truncateB();
+    return "OK\n";
+  }
+  else return "Unknown table \"" + tokens[1] + "\"\n";;
+}
+
+string Handler::handleIntersection(Tokens const &tokens) {
   if (tokens.size() != 1)
     return "ERR command \"INTERSECTION\" takes no args\n";
 
@@ -74,7 +82,7 @@ string Handler::handleIntersection(vector<string> const &tokens) {
   return formatJoinResult(intersection);
 }
 
-string Handler::handleSymmetricDifference(vector<string> const &tokens) {
+string Handler::handleSymmetricDifference(Tokens const &tokens) {
   if (tokens.size() != 1)
     return "ERR command \"SYMMETRIC_DIFFERENCE\" takes no args\n";
 

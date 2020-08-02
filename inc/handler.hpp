@@ -13,9 +13,13 @@ namespace otus {
     std::string handleCommand(std::string_view command);
 
   private:
+    using Tokens = std::vector<std::string>;
+
     Solver solver { };
 
-    std::string handleIntersection(std::vector<std::string> const &tokens);
-    std::string handleSymmetricDifference(std::vector<std::string> const &tokens);
+    std::string handleInsert(Tokens const &tokens);
+    std::string handleTruncate(Tokens const &tokens);
+    std::string handleIntersection(Tokens const &tokens);
+    std::string handleSymmetricDifference(Tokens const &tokens);
   };
 }
