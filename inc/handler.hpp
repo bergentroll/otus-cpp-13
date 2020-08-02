@@ -9,49 +9,23 @@
 
 #include "solver.hpp"
 
-// TODO Solver::JoinType => vector of strings.
 namespace otus {
-  inline std::tuple<size_t, size_t, size_t> getColMaxWidth (Solver::JoinType &input) {
-    size_t idMaxWidth { 2 }, nameAMaxWidth { 1 }, nameBMaxWidth { 1 };
-    for (auto const &line: input) {
-      auto idWidth { std::to_string(std::get<0>(line)).size() }; // FIXME Perfomance penalty
-      auto nameAWidth { std::get<1>(line).size() };
-      auto nameBWidth { std::get<2>(line).size() };
-      idMaxWidth = std::max(idMaxWidth, idWidth);
-      nameAMaxWidth = std::max(nameAMaxWidth, nameAWidth);
-      nameBMaxWidth = std::max(nameBMaxWidth, nameBWidth);
-    }
-    return std::make_tuple(idMaxWidth, nameAMaxWidth, nameBMaxWidth);
-  }
-
-  inline std::string format_join_result (Solver::JoinType &input) {
+  inline std::string formatJoinResult (Solver::JoinType &input) {
     std::sort(input.begin(), input.end(), [](auto const &a, auto const &b) {
           return std::get<0>(a) < std::get<0>(b);
         });
 
-    auto [idColWidth, nameAColWidth, nameBColWidth] { getColMaxWidth(input) };
-
     std::stringstream result { };
-    result << std::left;
-    result
-      << std::setw(idColWidth) << "id" << " | "
-      << std::setw(nameAColWidth) << "A" << " | "
-      << std::setw(nameBColWidth) << "B" << '\n';
-    result
-      << std::string(idColWidth + 1, '-') << '+'
-      << std::string(nameAColWidth + 2, '-') << '+'
-      << std::string(nameBColWidth + 2, '-') << '\n';
 
     for (auto line: input) {
       auto id { std::to_string(std::get<0>(line)) };
-      auto nameA { std::get<1>(line) };
-      auto nameB { std::get<2>(line) };
+      auto const &nameA { std::get<1>(line) };
+      auto const &nameB { std::get<2>(line) };
 
-      result
-        << std::setw(idColWidth) << id << " | "
-        << std::setw(nameAColWidth) << nameA << " | "
-        << std::setw(nameBColWidth) << nameB << '\n';
+      result << id << ',' << nameA << ',' << nameB << '\n';
     }
+
+    result << "OK\n";
 
     return result.str();
   }
@@ -71,14 +45,14 @@ namespace otus {
 
       if (tokens[0] == "INSERT") {
         if (tokens.size() != 4)
-          return "Error: command \"INSERT\" takes exactly three args\n";
+          return "ERR command \"INSERT\" takes exactly three args\n";
 
         int id;
         try {
           id = boost::lexical_cast<int>(tokens[2]);
         }
         catch (boost::bad_lexical_cast const &e) {
-          return "Error: invalid id \"" + tokens[2] + "\"\n";
+          return "ERR invalid id \"" + tokens[2] + "\"\n";
         }
 
         auto const &name { tokens[3] };
@@ -95,7 +69,7 @@ namespace otus {
       }
       else if (tokens[0] == "TRUNCATE") {
         if (tokens.size() != 2)
-          return "Error: command \"TRUNCATE\" takes exactly one arg\n";
+          return "ERR command \"TRUNCATE\" takes exactly one arg\n";
         else if (tokens[1] == "A") {
           solver.truncateA();
           return "OK\n";
@@ -113,7 +87,7 @@ namespace otus {
         return handleSymmetricDifference(tokens);
       }
 
-      return "Error: unknown command \"" + tokens[0] + "\"\n";
+      return "ERR unknown command \"" + tokens[0] + "\"\n";
   }
 
   private:
@@ -121,20 +95,20 @@ namespace otus {
 
     std::string handleIntersection(std::vector<std::string> const &tokens) {
       if (tokens.size() != 1)
-        return "Error: command \"INTERSECTION\" takes no args\n";
+        return "ERR command \"INTERSECTION\" takes no args\n";
 
       auto intersection { solver.intersection() };
 
-      return format_join_result(intersection);
+      return formatJoinResult(intersection);
     }
 
     std::string handleSymmetricDifference(std::vector<std::string> const &tokens) {
       if (tokens.size() != 1)
-        return "Error: command \"SYMMETRIC_DIFFERENCE\" takes no args\n";
+        return "ERR command \"SYMMETRIC_DIFFERENCE\" takes no args\n";
 
       auto symDiff { solver.symmetricDifference() };
 
-      return format_join_result(symDiff);
+      return formatJoinResult(symDiff);
     }
   };
 }
