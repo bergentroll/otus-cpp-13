@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_SUITE(HandlerTest);
 
 BOOST_AUTO_TEST_CASE(error_duplicate) {
   Handler handler { };
-  string expected { "ERR duplicate 0" };
+  string expected { "ERR duplicate 0\n" };
 
   handler.handleCommand("INSERT A 0 lean");
   auto result { handler.handleCommand("INSERT A 0 pumpkin") };

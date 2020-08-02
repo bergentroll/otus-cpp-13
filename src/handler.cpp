@@ -34,6 +34,7 @@ string Handler::handleCommand(string_view command) {
   return "ERR unknown command \"" + tokens[0] + "\"\n";
 }
 
+// TODO Refactor
 string Handler::handleInsert(Tokens const &tokens) {
   if (tokens.size() != 4)
     return "ERR command \"INSERT\" takes exactly three args\n";
@@ -49,11 +50,21 @@ string Handler::handleInsert(Tokens const &tokens) {
   auto const &name { tokens[3] };
 
   if (tokens[1] == "A") {
-    solver.insertToA(id, name);
+    try {
+      solver.insertToA(id, name);
+    }
+    catch (Solver::DuplicateError const &e) {
+      return "ERR " + string(e.what()) + '\n';
+    }
     return "OK\n";
   }
   else if (tokens[1] == "B") {
-    solver.insertToB(id, name);
+    try {
+      solver.insertToB(id, name);
+    }
+    catch (Solver::DuplicateError const &e) {
+      return "ERR " + string(e.what()) + '\n';
+    }
     return "OK\n";
   }
   else return "Unknown table \"" + tokens[1] + "\"\n";;

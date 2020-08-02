@@ -12,12 +12,23 @@ namespace otus {
     using JoinType =
       std::vector<std::tuple<int, std::string, std::string>>;
 
-    bool insertToA(int id, std::string const &name) {
-      return a.insert({ id, name }).second;
+    class DuplicateError: public std::runtime_error {
+    public:
+      DuplicateError(std::string const &message):
+      std::runtime_error(message) { }
+    };
+
+    // TODO Refactor insertion
+    void insertToA(int id, std::string const &name) {
+      auto [iter, success] { a.insert({ id, name }) };
+      if (!success)
+        throw DuplicateError("duplicate " + std::to_string((*iter).first));
     }
 
-    bool insertToB(int id, std::string const &name) {
-      return b.insert({ id, name }).second;
+    void insertToB(int id, std::string const &name) {
+      auto [iter, success] { b.insert({ id, name }) };
+      if (!success)
+        throw DuplicateError("duplicate " + std::to_string((*iter).first));
     }
 
     void truncateA() { a.clear(); }
