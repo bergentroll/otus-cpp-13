@@ -34,7 +34,8 @@ add_library(
   ${CMAKE_PROJECT_NAME}-obj
   ${SRC_PATH}/handler.cpp
   ${SRC_PATH}/server.cpp
-  ${SRC_PATH}/session.cpp)
+  ${SRC_PATH}/session.cpp
+  ${SRC_PATH}/solver.cpp)
 target_link_libraries(
   ${CMAKE_PROJECT_NAME}-obj
   ${CMAKE_THREAD_LIBS_INIT}
