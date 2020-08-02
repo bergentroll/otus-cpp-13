@@ -16,7 +16,6 @@ namespace otus {
 
     Solver solver { };
 
-    // TODO Duplicates
     std::string handleInsert(Tokens const &tokens);
     std::string handleTruncate(Tokens const &tokens);
     std::string handleIntersection(Tokens const &tokens);

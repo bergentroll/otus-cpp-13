@@ -22,8 +22,6 @@ void Session::doRead() {
             io::buffers_begin(bufs) + bytesTransferred - 1); // Eliminate \n
         buffer.consume(bytesTransferred);
 
-        cerr << "LINE: " << s << endl; // TODO
-
         doWrite(handler.handleCommand(s));
         }
         else {
@@ -35,7 +33,6 @@ void Session::doRead() {
 void Session::doWrite(string const &message) {
   auto self(shared_from_this());
 
-  cerr << "doWrite()" << endl;
   socket.async_write_some(
       io::buffer(message),
       [this, self](auto const &ec, size_t) {
