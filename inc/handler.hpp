@@ -7,7 +7,6 @@
 namespace otus {
   std::string formatJoinResult (Solver::JoinType &input);
 
-  // TODO test
   class Handler {
   public:
     std::string handleCommand(std::string_view command);
@@ -17,6 +16,7 @@ namespace otus {
 
     Solver solver { };
 
+    // TODO Duplicates
     std::string handleInsert(Tokens const &tokens);
     std::string handleTruncate(Tokens const &tokens);
     std::string handleIntersection(Tokens const &tokens);

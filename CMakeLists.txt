@@ -30,36 +30,41 @@ find_package(Threads REQUIRED)
 
 ### Main targets ##############################################################
 
-add_executable(
-  ${CMAKE_PROJECT_NAME}
-  ${SRC_PATH}/main.cpp
+add_library(
+  ${CMAKE_PROJECT_NAME}-obj
   ${SRC_PATH}/handler.cpp
   ${SRC_PATH}/server.cpp
   ${SRC_PATH}/session.cpp)
 target_link_libraries(
-  ${CMAKE_PROJECT_NAME}
+  ${CMAKE_PROJECT_NAME}-obj
   ${CMAKE_THREAD_LIBS_INIT}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+add_executable(
+  ${CMAKE_PROJECT_NAME}
+  ${SRC_PATH}/main.cpp)
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}
+  ${CMAKE_PROJECT_NAME}-obj)
+
 ### Tests #####################################################################
 
-# TODO
-#if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
-#  add_executable(test-suite ${TEST_PATH}/test.cpp)
-#
-#  target_link_libraries(
-#    test-suite
-#    PRIVATE
-#    ${CMAKE_PROJECT_NAME}-obj
-#    Boost::unit_test_framework)
-#  add_test(test-suite test-suite)
-#else()
-#  message(
-#    WARNING "Test suite will not be launched because Boost.Test not found.")
-#endif()
-#
-#enable_testing()
+if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
+  add_executable(test-suite ${TEST_PATH}/test.cpp)
+
+  target_link_libraries(
+    test-suite
+    PRIVATE
+    ${CMAKE_PROJECT_NAME}-obj
+    Boost::unit_test_framework)
+  add_test(test-suite test-suite)
+else()
+  message(
+    WARNING "Test suite will not be launched because Boost.Test not found.")
+endif()
+
+enable_testing()
 
 ### Packing ###################################################################
 
