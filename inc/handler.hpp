@@ -4,26 +4,56 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 #include "solver.hpp"
 
+// TODO Solver::JoinType => vector of strings.
 namespace otus {
+  inline std::tuple<size_t, size_t, size_t> getColMaxWidth (Solver::JoinType &input) {
+    size_t idMaxWidth { 2 }, nameAMaxWidth { 1 }, nameBMaxWidth { 1 };
+    for (auto const &line: input) {
+      auto idWidth { std::to_string(std::get<0>(line)).size() }; // FIXME Perfomance penalty
+      auto nameAWidth { std::get<1>(line).size() };
+      auto nameBWidth { std::get<2>(line).size() };
+      idMaxWidth = std::max(idMaxWidth, idWidth);
+      nameAMaxWidth = std::max(nameAMaxWidth, nameAWidth);
+      nameBMaxWidth = std::max(nameBMaxWidth, nameBWidth);
+    }
+    return std::make_tuple(idMaxWidth, nameAMaxWidth, nameBMaxWidth);
+  }
+
   inline std::string format_join_result (Solver::JoinType &input) {
     std::sort(input.begin(), input.end(), [](auto const &a, auto const &b) {
           return std::get<0>(a) < std::get<0>(b);
         });
 
-    std::string result { };
+    auto [idColWidth, nameAColWidth, nameBColWidth] { getColMaxWidth(input) };
+
+    std::stringstream result { };
+    result << std::left;
+    result
+      << std::setw(idColWidth) << "id" << " | "
+      << std::setw(nameAColWidth) << "A" << " | "
+      << std::setw(nameBColWidth) << "B" << '\n';
+    result
+      << std::string(idColWidth + 1, '-') << '+'
+      << std::string(nameAColWidth + 2, '-') << '+'
+      << std::string(nameBColWidth + 2, '-') << '\n';
 
     for (auto line: input) {
-      result += std::to_string(std::get<0>(line));
-      result += " | ";
-      result += std::get<1>(line);
-      result += " | ";
-      result += std::get<2>(line);
-      result += '\n';
+      auto id { std::to_string(std::get<0>(line)) };
+      auto nameA { std::get<1>(line) };
+      auto nameB { std::get<2>(line) };
+
+      result
+        << std::setw(idColWidth) << id << " | "
+        << std::setw(nameAColWidth) << nameA << " | "
+        << std::setw(nameBColWidth) << nameB << '\n';
     }
-    return result;
+
+    return result.str();
   }
 
   // TODO test
