@@ -24,6 +24,9 @@ void Session::doRead() {
 
         doWrite(handler.handleCommand(s));
         }
+        else if (ec == io::error::eof) {
+          cerr << "Connection closed by peer" << endl;
+        }
         else {
           cerr << "Error while reading socket: " << ec.message() << endl;
         }
