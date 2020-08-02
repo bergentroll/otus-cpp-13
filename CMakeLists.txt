@@ -33,6 +33,7 @@ find_package(Threads REQUIRED)
 add_executable(
   ${CMAKE_PROJECT_NAME}
   ${SRC_PATH}/main.cpp
+  ${SRC_PATH}/handler.cpp
   ${SRC_PATH}/server.cpp
   ${SRC_PATH}/session.cpp)
 target_link_libraries(
