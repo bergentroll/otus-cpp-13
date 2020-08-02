@@ -30,7 +30,11 @@ find_package(Threads REQUIRED)
 
 ### Main targets ##############################################################
 
-add_executable(${CMAKE_PROJECT_NAME} ${SRC_PATH}/main.cpp)
+add_executable(
+  ${CMAKE_PROJECT_NAME}
+  ${SRC_PATH}/main.cpp
+  ${SRC_PATH}/server.cpp
+  ${SRC_PATH}/session.cpp)
 target_link_libraries(
   ${CMAKE_PROJECT_NAME}
   ${CMAKE_THREAD_LIBS_INIT}
