@@ -4,26 +4,47 @@ using namespace std;
 using namespace otus;
 
 void Solver::insert(string const &tableName, int id, string const &name) {
-  auto [iter, success] { getTableByName(tableName).insert({ id, name }) };
+  auto &target { getTableByName(tableName) };
+  auto [iter, success] { target.getLocked().insert({ id, name }) };
+  target.unlock();
+
   if (!success)
     throw InvalidOperation("duplicate " + to_string((*iter).first));
 }
 
-Solver::JoinType Solver::intersection() const {
+void Solver::truncate(string const &tableName) {
+  auto &target { getTableByName(tableName) };
+  target.getLocked().clear();
+  target.unlock();
+}
+
+Solver::JoinType Solver::intersection() {
   JoinType result { };
-  for (auto const &[id, name]: a) {
-    try { result.push_back({ id, name, b.at(id) }); }
+  auto const &tableA { a.getSharedLocked() };
+  auto const &tableB { b.getSharedLocked() };
+
+  for (auto const &[id, name]: tableA) {
+    try { result.push_back({ id, name, tableB.at(id) }); }
     catch (out_of_range const &) { }
   }
+
+  a.sharedUnlock();
+  b.sharedUnlock();
   return result;
 }
 
-Solver::JoinType Solver::symmetricDifference() const {
+Solver::JoinType Solver::symmetricDifference() {
   JoinType result { };
-  for (auto const &[id, name]: a)
-      if (b.count(id) == 0) result.push_back({ id, name, "" });
-  for (auto const &[id, name]: b)
-      if (a.count(id) == 0) result.push_back({ id, "", name });
+  auto const &tableA { a.getSharedLocked() };
+  auto const &tableB { b.getSharedLocked() };
+
+  for (auto const &[id, name]: tableA)
+      if (tableB.count(id) == 0) result.push_back({ id, name, "" });
+  for (auto const &[id, name]: tableB)
+      if (tableA.count(id) == 0) result.push_back({ id, "", name });
+
+  a.sharedUnlock();
+  b.sharedUnlock();
   return result;
 }
 

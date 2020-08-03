@@ -3,8 +3,9 @@
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
+
+#include "thread_safe_table.hpp"
 
 namespace otus {
   class Solver {
@@ -26,18 +27,13 @@ namespace otus {
 
     void insert(std::string const &tableName, int id, std::string const &name);
 
-    void truncate(std::string const &tableName) {
-      getTableByName(tableName).clear();
-    }
+    void truncate(std::string const &tableName);
 
-    void truncateA() { a.clear(); }
-    void truncateB() { b.clear(); }
-
-    JoinType intersection() const;
-    JoinType symmetricDifference() const;
+    JoinType intersection();
+    JoinType symmetricDifference();
 
   private:
-    using TableType = std::unordered_map<int, std::string>;
+    using TableType = ThreadSafeTable;
 
     TableType a { }, b { };
 
