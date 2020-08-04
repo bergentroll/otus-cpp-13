@@ -4,6 +4,7 @@
 #include <boost/system/error_code.hpp>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "server.hpp"
@@ -61,10 +62,26 @@ int main(int argc, char const **argv) {
     return EXIT_FAILURE;
   }
 
+  unsigned const threadsNum { thread::hardware_concurrency() };
+
+  cerr << "Threads num set to " << threadsNum << endl;
+
+  vector<thread> pool { };
+  pool.reserve(threadsNum);
+
   io::io_service context;
+
   try {
     Server server { context, port };
-    context.run();
+
+    if (threadsNum != 0) {
+      for (unsigned i { }; i < threadsNum; ++i)
+        pool.emplace_back([&context]() { context.run(); });
+      for (auto &thread: pool) thread.join();
+    }
+    else {
+      context.run();
+    }
   }
   catch (boost::system::system_error const &e) {
     cerr << "Server error: " << e.what() << endl;
